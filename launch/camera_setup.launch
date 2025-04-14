@@ -2,33 +2,30 @@
     <arg name="camera_name" default="front" doc="Choose your robot. Possible values: [front, wrist, top]"/>
 
     <!-- Front -->
-    <group if="$(eval arg('camera_name') == 'front')">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-            <arg name="camera" value="front_cam"/>
-            <arg name="serial_no" value="f1381254"/>
-            <arg name="filters" value="spatial,temporal,pointcloud"/>
-            <arg name="ordered_pc" value="true" />
-        </include>
-    </group>
+    <include if="$(eval arg('camera_name') == 'front')" file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="camera" value="front_cam"/>
+        <arg name="serial_no" value="f1381254"/>
+        <arg name="enable_sync" value="true" />
+        <arg name="filters" value="spatial,temporal,pointcloud"/>
+        <arg name="ordered_pc" value="true" />
+    </include>
 
     <!-- Wrist -->
-    <group if="$(eval arg('camera_name') == 'wrist')">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-            <arg name="camera" value="wrist_cam"/>
-            <arg name="serial_no" value="919122070360"/>
-            <arg name="filters" value="spatial,temporal,pointcloud"/>
-            <arg name="ordered_pc" value="true" />
-        </include>
-    </group>
+    <include if="$(eval arg('camera_name') == 'wrist')" file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="camera" value="wrist_cam"/>
+        <arg name="serial_no" value="919122070360"/>
+        <arg name="enable_sync" value="true" />
+        <!-- <arg name="filters" value="spatial,temporal,pointcloud"/> -->
+        <!-- <arg name="ordered_pc" value="true" /> -->
+    </include>
 
     <!-- Top -->
-    <group if="$(eval arg('camera_name') == 'top')">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-            <arg name="camera" value="top_cam"/>
-            <arg name="serial_no" value="935322072092"/>
-            <arg name="filters" value="spatial,temporal,pointcloud"/>
-            <arg name="ordered_pc" value="true" />
-        </include>
-    </group>
+    <include if="$(eval arg('camera_name') == 'top')" file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="camera" value="top_cam"/>
+        <arg name="serial_no" value="935322072092"/>
+        <arg name="enable_sync" value="true" />
+        <!-- <arg name="filters" value="spatial,temporal,pointcloud"/> -->
+        <!-- <arg name="ordered_pc" value="true" /> -->
+    </include>
     
 </launch>

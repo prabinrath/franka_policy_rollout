@@ -1,0 +1,10 @@
+<launch>
+    <include file="$(find codig_robot)/launch/camera_setup.launch">
+        <arg name="camera_name" value="front"/>
+    </include>
+    <include file="$(find codig_robot)/launch/camera_setup.launch">
+        <arg name="camera_name" value="wrist"/>
+    </include>
+    <node name="record_bag_node" pkg="codig_robot" type="record_bag_node.py" output="screen" 
+        args="--bag_root $(find codig_robot)/bags" />
+</launch>
