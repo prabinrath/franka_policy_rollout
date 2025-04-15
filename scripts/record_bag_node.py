@@ -52,7 +52,8 @@ class RecordBagNode():
     def joy_callback(self, msg):
         if msg.buttons[8] > 0 and not self.is_recording:
             ros.loginfo(f"started recording demo: {self.demo_num}")
-            self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
+            with self.bag_lock:
+                self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
             self.is_recording = True
         elif msg.buttons[9] > 0 and self.is_recording:
             self.is_recording = False
@@ -87,9 +88,10 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Codig demonstration recorder")
     parser.add_argument("--bag_root", default="./bags", type=str, help="bag root path")
     parser.add_argument("--task", default="task", type=str, help="name of the task")
+    parser.add_argument("--policy", default="synced", type=str, help="time policy")
     args, _ = parser.parse_known_args()
     bag_path = os.path.join(args.bag_root, args.task)
     Path(bag_path).mkdir(parents=True, exist_ok=True)
-    RecordBagNode(bag_path, policy="synced")
+    RecordBagNode(bag_path, policy=args.policy)
     ros.spin()
     
