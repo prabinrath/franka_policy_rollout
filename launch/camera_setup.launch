@@ -4,7 +4,8 @@
     <!-- Front -->
     <include if="$(eval arg('camera_name') == 'front')" file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="camera" value="front_cam"/>
-        <arg name="serial_no" value="f1381254"/>
+        <!-- <arg name="serial_no" value="f1381254"/> -->
+        <arg name="serial_no" value="938422074102"/>
         <arg name="enable_sync" value="true" />
         <arg name="filters" value="spatial,temporal,pointcloud"/>
         <arg name="ordered_pc" value="true" />
