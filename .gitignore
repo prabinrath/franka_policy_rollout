@@ -1,2 +1,5 @@
 bags
 h5_converted
+rollout
+dataset
+*.pyc

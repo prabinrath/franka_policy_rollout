@@ -1,0 +1,9 @@
+<launch>
+    <arg name="task" default="task" doc="Name of the task"/>
+    <include file="$(find codig_robot)/launch/camera_setup.launch">
+        <arg name="camera_name" value="front"/>
+    </include>
+    <include file="$(find codig_robot)/launch/camera_setup.launch">
+        <arg name="camera_name" value="wrist"/>
+    </include>
+</launch>

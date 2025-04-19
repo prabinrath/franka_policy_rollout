@@ -102,7 +102,7 @@ def replay_bag(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bag post processor")
-    parser.add_argument("--demo_h5", default="h5_converted/block_stack.h5", type=str, help="path to h5")
+    parser.add_argument("--demo_h5", default="dataset/block_stack.h5", type=str, help="path to h5")
     args, _ = parser.parse_known_args()
 
     replay_bag(args)
