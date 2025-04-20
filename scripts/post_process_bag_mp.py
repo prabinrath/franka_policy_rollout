@@ -41,6 +41,9 @@ def single_process(idx, path, args, lock):
             if "joint_states" in topic:
                 js = np.vstack((np.asarray(msg.position), np.asarray(msg.velocity), np.asarray(msg.effort)))
                 data_track["joint_states"].append(np.expand_dims(js,0))
+            if "gripper_state" in topic:
+                gs = np.asarray(msg.data)
+                data_track["gripper_state"].append(np.expand_dims(gs,0))
 
     if args.down_sample_factor > 1:
         total_len = len(data_track["front_img"])
@@ -85,14 +88,14 @@ def postprocess_bag(args):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bag post processor")
-    parser.add_argument("--bag_root", default="../codig_robot/bags/", type=str, help="bag root path")
+    parser.add_argument("--bag_root", default="./bags", type=str, help="bag root path")
     parser.add_argument("--task", default="block_pick", type=str, help="task name")
     parser.add_argument("--dataset_path", default="./dataset", type=str, help="dataset path")
     parser.add_argument("--height", default=96, type=int, help="image height")
     parser.add_argument("--width", default=96, type=int, help="image width")
     parser.add_argument("--pc_density", default=1, type=int, help="pc density multiplier")
     parser.add_argument("--batch_size", default=1, type=int, help="multi processing batch size")
-    parser.add_argument("--down_sample_factor", default=3, type=int, help="time step downsampling factor")
+    parser.add_argument("--down_sample_factor", default=1, type=int, help="time step downsampling factor")
     args, _ = parser.parse_known_args()
 
     postprocess_bag(args)

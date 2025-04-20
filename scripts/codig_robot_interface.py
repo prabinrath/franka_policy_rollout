@@ -17,7 +17,6 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from sensor_msgs.msg import JointState, PointCloud2, Image
 from control_msgs.msg import FollowJointTrajectoryActionGoal
 from franka_gripper.msg import GraspAction, GraspGoal, MoveAction, MoveGoal
-from scipy.interpolate import CubicSpline
 import numpy as np
 
 
@@ -149,24 +148,7 @@ class FrankaRolloutInterface(PolicyRollout):
 
         joint_pos = np.asarray(js_msg.position)
         self.data_dict["rob_obs_history"] = np.roll(self.data_dict["rob_obs_history"], shift=-1, axis=1)
-        self.data_dict["rob_obs_history"][0,-1,...] = joint_pos
-        ros.sleep(self.dt)
-    
-    def postprocess_trajectory(self, traj, num_queries, k_size=4):
-        # fit a fine cubic spline for interpolation
-        fit_array_x = np.arange(traj.shape[0]) / traj.shape[0]
-        fit_array_x_query = np.linspace(0, fit_array_x[-1], num_queries)
-        cs = CubicSpline(fit_array_x, traj)
-        spline_traj = np.array([cs(x) for x in fit_array_x_query])
-
-        # smoothen the trajectory for execution
-        smoothened_traj = np.copy(spline_traj)
-        kernel = np.ones(k_size)/k_size
-        for dim in range(spline_traj.shape[1]):
-            smoothened_traj[k_size//2:-(k_size//2)+(1-k_size%2), dim] = \
-                np.convolve(spline_traj[:,dim], kernel, 'valid')
-    
-        return fit_array_x_query, smoothened_traj
+        self.data_dict["rob_obs_history"][0,-1,...] = joint_pos        
 
     def rollout(self):
         while True: # rollout infinitely
@@ -175,21 +157,21 @@ class FrankaRolloutInterface(PolicyRollout):
                     self.gripper_interface.grasp_open()
                     ros.sleep(2.0) # prepare for rollout
                     for _ in range(self.roll_cfg.n_obs_steps):
+                        ros.sleep(self.dt)
                         self.update_data()
                 if self.current_rollout_step < self.roll_cfg.max_traj_len:
-                    self.update_data()
                     act_h = self.get_model_pred(**self.data_dict).squeeze(0).cpu().numpy()
-                    # act_h = self.postprocess_trajectory(act_h, 100)
                     for h_idx in range(1, self.roll_cfg.rollout_steps):
                         next_js_goal = FollowJointTrajectoryActionGoal()
                         next_js_goal.goal.trajectory.joint_names = self.joint_names[:-2]
-                        js_ = self.data_dict["rob_obs_history"][0,-1][:-2] * 0.1 + act_h[h_idx][:-2] * 0.9
+                        js_ = self.data_dict["rob_obs_history"][0,-1][:-2] * 0.2 + act_h[h_idx][:-2] * 0.8
                         point = JointTrajectoryPoint(positions=js_)
                         point.time_from_start = ros.Duration.from_sec(self.dt)
                         next_js_goal.goal.trajectory.points.append(point)
                         next_js_goal.goal.goal_time_tolerance = ros.Duration.from_sec(0.5)
                         self.online_jpos_publisher.publish(next_js_goal)
                         self.gripper_interface.handle_grasp(act_h[h_idx][-1])
+                        ros.sleep(self.dt)
                         self.update_data()
                         self.current_rollout_step += 1
                 else:

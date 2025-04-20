@@ -28,7 +28,7 @@ def postprocess_trajectory(traj, num_queries, k_size=4):
     
     return fit_array_x_query, smoothened_traj
 
-def replay_bag(args):
+def replay_h5(args):
     ros.init_node("replay_bag_node")
     online_command_publisher = ros.Publisher(
             "/effort_joint_trajectory_controller/follow_joint_trajectory/goal",
@@ -57,11 +57,11 @@ def replay_bag(args):
                    "fr3_finger_joint1", 
                    "fr3_finger_joint2"]
     with h5py.File(args.demo_h5) as file:
-        joints_track_np = file["data/data_0/joint_states"][:][:,0]
+        joints_track_np = file[f"data/demo_{args.demo_idx}/joint_states"][:][:,0]
+        gripper_track_np = file[f"data/demo_{args.demo_idx}/gripper_state"][:][:,0]
 
-    K = 1
-    _, joints_track_np = postprocess_trajectory(joints_track_np, joints_track_np.shape[0] * K)
-    dt = 0.1/K + 0.001
+    _, joints_track_np = postprocess_trajectory(joints_track_np, joints_track_np.shape[0])
+    dt = 0.1
 
     move_goal = MoveGoal()
     move_goal.width = 0.08
@@ -70,7 +70,7 @@ def replay_bag(args):
     move_action_client.wait_for_result(ros.Duration(5))
     is_grasped = False
     gripper_close_time, gripper_open_time = ros.Time.now(), ros.Time.now()
-    for js in joints_track_np:
+    for js, gs in zip(joints_track_np, gripper_track_np):
         next_js_goal = FollowJointTrajectoryActionGoal()
         next_js_goal.goal.trajectory.joint_names = joint_names[:-2]
         point = JointTrajectoryPoint(positions=js[:-2])
@@ -80,7 +80,7 @@ def replay_bag(args):
         online_command_publisher.publish(next_js_goal)
         if is_grasped:
             gripper_open_time = ros.Time.now()
-        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and js[-1] < 0.039:
+        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and gs > 0:
             grap_goal = GraspGoal()
             grap_goal.width = 0.0
             grap_goal.epsilon.inner = 0.08
@@ -90,7 +90,7 @@ def replay_bag(args):
             grasp_action_client.send_goal(grap_goal)
             is_grasped = True
             gripper_close_time = ros.Time.now()
-        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and js[-1] > 0.038:
+        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and gs < 1:
             move_goal = MoveGoal()
             move_goal.width = 0.08
             move_goal.speed = 0.1
@@ -102,7 +102,8 @@ def replay_bag(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bag post processor")
-    parser.add_argument("--demo_h5", default="dataset/block_stack.h5", type=str, help="path to h5")
+    parser.add_argument("--demo_h5", default="./dataset/test_gripper.h5", type=str, help="path to h5")
+    parser.add_argument("--demo_idx", default=1, type=int, help="demo index")
     args, _ = parser.parse_known_args()
 
-    replay_bag(args)
+    replay_h5(args)
