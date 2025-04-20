@@ -73,9 +73,9 @@ class FrankaRolloutInterface(PolicyRollout):
 
     def __init__(self):
         with initialize(version_base=None, config_path="../../../../codig/config"):
-            self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=mma1_block", "++datasets.filepath=block_pick"])
+            # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=mma1_block", "++datasets.filepath=block_pick"])
             # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=gmod1", "models@_global_=gdn_dit", "++datasets.filepath=block_pick"])
-            # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=vx1", "models@_global_=dit", "++datasets.filepath=block_pick"])
+            self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=vx1", "models@_global_=dit", "++datasets.filepath=block_pick"])
         super().__init__(self.roll_cfg)
         set_seed(self.roll_cfg.seed)
         self.dt = 0.1
@@ -120,16 +120,16 @@ class FrankaRolloutInterface(PolicyRollout):
         assert front_pts_msg is not None
         assert js_msg is not None
 
-        front_img = self.bridge.imgmsg_to_cv2(front_cam_msg, desired_encoding='bgr8') # TODO: need to refactor
+        front_img = self.bridge.imgmsg_to_cv2(front_cam_msg, desired_encoding='rgb8')
         front_img = cv2.resize(front_img, (96, 96), interpolation=cv2.INTER_LINEAR)
         front_img = cv2.rotate(front_img, cv2.ROTATE_180)
-        front_img = np.moveaxis(front_img, -1, -3)[...,::-1] / 255.0 # TODO: need to refactor
+        front_img = np.moveaxis(front_img, -1, -3) / 255.0 
         self.data_dict["cam_obs_front_img"] = np.roll(self.data_dict["cam_obs_front_img"], shift=-1, axis=1)
         self.data_dict["cam_obs_front_img"][0,-1,...] = front_img
 
-        wrist_img = self.bridge.imgmsg_to_cv2(wrist_cam_msg, desired_encoding='bgr8') # TODO: need to refactor
+        wrist_img = self.bridge.imgmsg_to_cv2(wrist_cam_msg, desired_encoding='rgb8') 
         wrist_img = cv2.resize(wrist_img, (96, 96), interpolation=cv2.INTER_LINEAR)
-        wrist_img = np.moveaxis(wrist_img, -1, -3)[...,::-1] / 255.0 # TODO: need to refactor
+        wrist_img = np.moveaxis(wrist_img, -1, -3) / 255.0 
         self.data_dict["cam_obs_wrist_img"] = np.roll(self.data_dict["cam_obs_wrist_img"], shift=-1, axis=1)
         self.data_dict["cam_obs_wrist_img"][0,-1,...] = wrist_img
 
