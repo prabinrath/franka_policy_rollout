@@ -18,10 +18,18 @@ class CodigRealRobot():
         )
 
     def joy_callback(self, msg):
-        if msg.buttons[8] > 0 and not self.robot.EXECUTE:
+        if msg.buttons[14] > 0 and not self.robot.EXECUTE:
             self.robot.EXECUTE = True
-        elif msg.buttons[9] > 0 and self.robot.EXECUTE:
+            print("Execution started.")
+        elif msg.buttons[10] > 0 and self.robot.EXECUTE:
             self.robot.EXECUTE = False
+            print("Execution stopped.")
+        elif msg.buttons[11] > 0:
+            # success 
+            pass
+        elif msg.buttons[12] > 0:
+            # failure 
+            pass
 
 
 if __name__ == "__main__":
