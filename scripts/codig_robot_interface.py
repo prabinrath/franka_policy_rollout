@@ -169,6 +169,13 @@ class FrankaRolloutInterface(PolicyRollout):
                     for h_idx in range(1, self.roll_cfg.rollout_steps):
                         next_js_goal = FollowJointTrajectoryActionGoal()
                         next_js_goal.goal.trajectory.joint_names = self.joint_names[:-2]
+                        safety = np.linalg.norm(act_h[h_idx][:-2]-self.data_dict["rob_obs_history"][0,-1][:-2])
+                        if safety > 0.1:
+                            print(f"safety: {safety}")
+                            self.EXECUTE = False
+                            self.current_rollout_step = 0
+                            print("Execution aborted.")
+                            break
                         js_ = self.data_dict["rob_obs_history"][0,-1][:-2] * 0.2 + act_h[h_idx][:-2] * 0.8
                         point = JointTrajectoryPoint(positions=js_)
                         point.time_from_start = ros.Duration.from_sec(self.dt)

@@ -49,6 +49,6 @@ class CodigRealRobot():
 if __name__ == "__main__":
     CodigRealRobot(
         task_name="block_pick",
-        policy_type="diffusion"
+        policy_type="codig"
         )
     ros.spin()
