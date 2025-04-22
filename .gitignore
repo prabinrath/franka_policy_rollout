@@ -2,4 +2,5 @@ bags
 h5_converted
 rollout
 dataset
+logs
 *.pyc
