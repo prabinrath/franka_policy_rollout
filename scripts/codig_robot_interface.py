@@ -74,8 +74,8 @@ class FrankaRolloutInterface(PolicyRollout):
     def __init__(self):
         with initialize(version_base=None, config_path="../../../../codig/config"):
             # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=mma1_block", "++datasets.filepath=block_pick"])
-            # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=gmod1", "models@_global_=gdn_dit", "++datasets.filepath=block_pick"])
-            self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=vx1", "models@_global_=dit", "++datasets.filepath=block_pick"])
+            self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=gmod1_lat100", "models@_global_=gdn_dit", "++datasets.filepath=block_pick"])
+            # self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=vx1", "models@_global_=dit", "++datasets.filepath=block_pick"])
         super().__init__(self.roll_cfg)
         set_seed(self.roll_cfg.seed)
         self.dt = 0.1

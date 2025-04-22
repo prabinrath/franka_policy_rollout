@@ -63,6 +63,17 @@ class RecordBagNode():
             self.grasp_toggle = False
 
         if msg.buttons[8] > 0 and not self.is_recording:
+            existing_files = os.listdir(self.bag_path)
+            used_nums = []
+            for fname in existing_files:
+                if fname.startswith("demo_") and fname.endswith(".bag"):
+                    try:
+                        num = int(fname[len("demo_"):-len(".bag")])
+                        used_nums.append(num)
+                    except ValueError:
+                        continue
+            next_demo_num = max(used_nums) + 1 if used_nums else 1
+            self.demo_num = next_demo_num
             ros.loginfo(f"started recording demo: {self.demo_num}")
             with self.bag_lock:
                 self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
