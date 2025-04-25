@@ -112,7 +112,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Codig demonstration recorder")
     parser.add_argument("--bag_root", default="./bags", type=str, help="bag root path")
     parser.add_argument("--task", default="task", type=str, help="name of the task")
-    parser.add_argument("--policy", default="latest", type=str, help="time policy")
+    parser.add_argument("--policy", default="synced", type=str, help="time policy")
     args, _ = parser.parse_known_args()
     bag_path = os.path.join(args.bag_root, args.task)
     Path(bag_path).mkdir(parents=True, exist_ok=True)

@@ -9,7 +9,7 @@ import datetime
 
 
 class CodigRealRobot():
-    def __init__(self, task_name, policy_type):
+    def __init__(self, task_name, policy_type, experiment_name):
         ros.init_node("policy_node")
         self.robot = FrankaRolloutInterface(task_name, policy_type)
         self.spacemouse_sub = ros.Subscriber(
@@ -19,7 +19,7 @@ class CodigRealRobot():
             queue_size=1,
         )
         Path(f"logs/{task_name}/{policy_type}").mkdir(parents=True, exist_ok=True)
-        self.log_file_path = f"logs/{task_name}/{policy_type}/{datetime.datetime.now()}.log"
+        self.log_file_path = f"logs/{task_name}/{policy_type}/{experiment_name}{datetime.datetime.now()}.log"
         self.log(f"checkpoint_path: {self.robot.checkpoint_path}")
         self.LOG_TOGGLE = True
 
@@ -48,7 +48,8 @@ class CodigRealRobot():
 
 if __name__ == "__main__":
     CodigRealRobot(
-        task_name="block_pick",
-        policy_type="codig"
+        task_name="pour_in_bowl",
+        policy_type="codig",
+        experiment_name=""
         )
     ros.spin()

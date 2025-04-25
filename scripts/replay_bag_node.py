@@ -60,7 +60,7 @@ def replay_bag(args):
                 gripper_track.append(msg.data)
     joints_track_np = np.array(joints_track)
     _, joints_track_np = postprocess_trajectory(joints_track_np, joints_track_np.shape[0])
-    dt = 0.1
+    dt = 0.33
 
     move_goal = MoveGoal()
     move_goal.width = 0.08

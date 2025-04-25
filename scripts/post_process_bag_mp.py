@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("--width", default=96, type=int, help="image width")
     parser.add_argument("--pc_density", default=1, type=int, help="pc density multiplier")
     parser.add_argument("--batch_size", default=1, type=int, help="multi processing batch size")
-    parser.add_argument("--down_sample_factor", default=1, type=int, help="time step downsampling factor")
+    parser.add_argument("--down_sample_factor", default=3, type=int, help="time step downsampling factor")
     args, _ = parser.parse_known_args()
 
     postprocess_bag(args)
