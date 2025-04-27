@@ -60,7 +60,7 @@ def replay_bag(args):
                 gripper_track.append(msg.data)
     joints_track_np = np.array(joints_track)
     _, joints_track_np = postprocess_trajectory(joints_track_np, joints_track_np.shape[0])
-    dt = 0.33
+    dt = 0.033
 
     move_goal = MoveGoal()
     move_goal.width = 0.08
@@ -79,7 +79,7 @@ def replay_bag(args):
         online_command_publisher.publish(next_js_goal)
         if is_grasped:
             gripper_open_time = ros.Time.now()
-        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and gs > 0:
+        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and js[-1] < 0.039:
             grap_goal = GraspGoal()
             grap_goal.width = 0.0
             grap_goal.epsilon.inner = 0.08
@@ -89,7 +89,7 @@ def replay_bag(args):
             grasp_action_client.send_goal(grap_goal)
             is_grasped = True
             gripper_close_time = ros.Time.now()
-        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and gs < 1:
+        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and js[-1] > 0.038:
             move_goal = MoveGoal()
             move_goal.width = 0.08
             move_goal.speed = 0.1

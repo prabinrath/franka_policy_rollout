@@ -80,7 +80,7 @@ def replay_h5(args):
         online_command_publisher.publish(next_js_goal)
         if is_grasped:
             gripper_open_time = ros.Time.now()
-        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and gs > 0:
+        if not is_grasped and ros.Time.now()-gripper_open_time > ros.Duration(2.0) and js[-1] < 0.039:
             grap_goal = GraspGoal()
             grap_goal.width = 0.0
             grap_goal.epsilon.inner = 0.08
@@ -90,7 +90,7 @@ def replay_h5(args):
             grasp_action_client.send_goal(grap_goal)
             is_grasped = True
             gripper_close_time = ros.Time.now()
-        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and gs < 1:
+        if is_grasped and ros.Time.now()-gripper_close_time > ros.Duration(2.0) and js[-1] > 0.038:
             move_goal = MoveGoal()
             move_goal.width = 0.08
             move_goal.speed = 0.1
