@@ -29,17 +29,21 @@ class CodigRealRobot():
 
     def joy_callback(self, msg):
         if msg.buttons[14] > 0 and not self.robot.EXECUTE:
+            # right middle button on space mouse
             self.robot.EXECUTE = True
             print("Execution started.")
         elif msg.buttons[10] > 0 and self.robot.EXECUTE:
+            # right square button on space mouse
             self.robot.EXECUTE = False
             print("Execution stopped.")
         elif msg.buttons[6] > 0 and self.LOG_TOGGLE:
-            # success 
+            # success
+            # 1 button space mouse
             self.log(f"recorded success")
             self.LOG_TOGGLE = False
         elif msg.buttons[7] > 0 and self.LOG_TOGGLE:
             # failure 
+            # 2 button on space mouse
             self.log(f"recorded failure")
             self.LOG_TOGGLE = False
         elif msg.buttons[6] == 0 and msg.buttons[7] == 0:

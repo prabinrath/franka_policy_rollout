@@ -3,4 +3,5 @@ h5_converted
 rollout
 dataset
 logs
+.vscode
 *.pyc

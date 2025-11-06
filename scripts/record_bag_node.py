@@ -63,6 +63,7 @@ class RecordBagNode():
             self.grasp_toggle = False
 
         if msg.buttons[8] > 0 and not self.is_recording:
+            # 3 button on space mouse
             existing_files = os.listdir(self.bag_path)
             used_nums = []
             for fname in existing_files:
@@ -79,6 +80,7 @@ class RecordBagNode():
                 self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
             self.is_recording = True
         elif msg.buttons[9] > 0 and self.is_recording:
+            # 4 button on space mouse
             self.is_recording = False
             with self.bag_lock:
                 self.bag.close()
