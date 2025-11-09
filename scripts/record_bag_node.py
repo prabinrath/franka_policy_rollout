@@ -107,7 +107,6 @@ class RecordBagNode():
                 self.bag.write("/wrist_cam/color/image_raw", wrist_cam_msg, wrist_cam_msg.header.stamp)
                 self.bag.write("/front_cam/depth/color/points", front_pts_msg, front_pts_msg.header.stamp)
                 self.bag.write("/joint_states", js_msg, js_msg.header.stamp)
-                self.bag.write("/gripper_state", Int8(data=int(self.is_grasped)), js_msg.header.stamp)
 
 
 if __name__=="__main__":

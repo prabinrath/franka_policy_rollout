@@ -76,7 +76,7 @@ class FrankaRolloutInterface(PolicyRollout):
             if policy_type == "motion_prior":
                 self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=mma1_block", f"++datasets.filepath={task_name}"])
             elif policy_type == "codig":
-                self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=gmod1_lat200", "models@_global_=gdn_dit", f"++datasets.filepath={task_name}"])
+                self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=gmod1_lat100", "models@_global_=gdn_dit", f"++datasets.filepath={task_name}"])
             elif policy_type == "diffusion":
                 self.roll_cfg = compose(config_name="rr_mm_rollout", overrides=["++ckpt_tag=vx1", "models@_global_=dit", f"++datasets.filepath={task_name}"])
             else:

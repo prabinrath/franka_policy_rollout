@@ -41,9 +41,6 @@ def single_process(idx, path, args, lock):
             if "joint_states" in topic:
                 js = np.vstack((np.asarray(msg.position), np.asarray(msg.velocity), np.asarray(msg.effort)))
                 data_track["joint_states"].append(np.expand_dims(js,0))
-            if "gripper_state" in topic:
-                gs = np.asarray(msg.data)
-                data_track["gripper_state"].append(np.expand_dims(gs,0))
 
     if args.down_sample_factor > 1:
         total_len = len(data_track["front_img"])

@@ -47,6 +47,7 @@ def replay_h5(args):
     )
     move_action_client.wait_for_server()
 
+    print("Loading h5...")
     joint_names = ["fr3_joint1", 
                    "fr3_joint2", 
                    "fr3_joint3", 
@@ -58,11 +59,11 @@ def replay_h5(args):
                    "fr3_finger_joint2"]
     with h5py.File(args.demo_h5) as file:
         joints_track_np = file[f"data/demo_{args.demo_idx}/joint_states"][:][:,0]
-        gripper_track_np = file[f"data/demo_{args.demo_idx}/gripper_state"][:][:,0]
 
     _, joints_track_np = postprocess_trajectory(joints_track_np, joints_track_np.shape[0])
     dt = 0.1
 
+    print("Executing...")
     move_goal = MoveGoal()
     move_goal.width = 0.08
     move_goal.speed = 0.1
@@ -70,7 +71,7 @@ def replay_h5(args):
     move_action_client.wait_for_result(ros.Duration(5))
     is_grasped = False
     gripper_close_time, gripper_open_time = ros.Time.now(), ros.Time.now()
-    for js, gs in zip(joints_track_np, gripper_track_np):
+    for js in joints_track_np:
         next_js_goal = FollowJointTrajectoryActionGoal()
         next_js_goal.goal.trajectory.joint_names = joint_names[:-2]
         point = JointTrajectoryPoint(positions=js[:-2])
@@ -102,7 +103,7 @@ def replay_h5(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bag post processor")
-    parser.add_argument("--demo_h5", default="./dataset/test_gripper.h5", type=str, help="path to h5")
+    parser.add_argument("--demo_h5", default="./dataset/softtoy_in_drawer.h5", type=str, help="path to h5")
     parser.add_argument("--demo_idx", default=1, type=int, help="demo index")
     args, _ = parser.parse_known_args()
 
