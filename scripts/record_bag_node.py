@@ -2,7 +2,7 @@
 
 import rospy as ros
 from sensor_msgs.msg import JointState, Joy, Image, PointCloud2
-from std_msgs.msg import Int8
+from std_msgs.msg import Int8, String
 import message_filters
 from threading import Thread, Lock
 import rosbag
@@ -12,8 +12,10 @@ import os
 
 
 class RecordBagNode():
-    def __init__(self, bag_path, policy="latest"):
-        self.bag_path = bag_path
+    def __init__(self, bag_root, task, policy="latest"):
+        self.bag_root = bag_root
+        self.task = task
+        self.bag_path = None
 
         assert policy in ["latest", "synced"]
         self.policy = policy
@@ -29,8 +31,12 @@ class RecordBagNode():
             self.joy_callback,
             queue_size=1,
         )
-        self.grasp_toggle = False
-        self.is_grasped = False
+        self.record_cmd_sub = ros.Subscriber(
+            "/record_command",
+            String,
+            self.record_cmd_callback,
+            queue_size=1,
+        )
 
         front_cam_sub = message_filters.Subscriber("/front_cam/color/image_raw", Image)
         wrist_cam_sub = message_filters.Subscriber("/wrist_cam/color/image_raw", Image)
@@ -52,40 +58,50 @@ class RecordBagNode():
             exec_thread = Thread(target=self.cache_aggregate)
             exec_thread.start()
     
-    def joy_callback(self, msg):
-        if msg.buttons[4] > 0 and not self.grasp_toggle:
-            if self.is_grasped:
-                self.is_grasped = False
-            else:
-                self.is_grasped = True
-            self.grasp_toggle = True
-        if msg.buttons[4] == 0:
-            self.grasp_toggle = False
+    def _start_recording(self, folder_name):
+        if self.is_recording:
+            return
+        self.bag_path = os.path.join(self.bag_root, folder_name)
+        Path(self.bag_path).mkdir(parents=True, exist_ok=True)
+        existing_files = os.listdir(self.bag_path)
+        used_nums = []
+        for fname in existing_files:
+            if fname.startswith("demo_") and fname.endswith(".bag"):
+                try:
+                    num = int(fname[len("demo_"):-len(".bag")])
+                    used_nums.append(num)
+                except ValueError:
+                    continue
+        self.demo_num = max(used_nums) + 1 if used_nums else 1
+        ros.loginfo(f"started recording demo: {self.demo_num} in {self.bag_path}")
+        with self.bag_lock:
+            self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
+        self.is_recording = True
 
+    def _stop_recording(self):
+        if not self.is_recording:
+            return
+        self.is_recording = False
+        with self.bag_lock:
+            self.bag.close()
+        ros.loginfo(f"saved demo: {self.demo_num}")
+        self.demo_num += 1
+
+    def joy_callback(self, msg):
         if msg.buttons[8] > 0 and not self.is_recording:
             # 3 button on space mouse
-            existing_files = os.listdir(self.bag_path)
-            used_nums = []
-            for fname in existing_files:
-                if fname.startswith("demo_") and fname.endswith(".bag"):
-                    try:
-                        num = int(fname[len("demo_"):-len(".bag")])
-                        used_nums.append(num)
-                    except ValueError:
-                        continue
-            next_demo_num = max(used_nums) + 1 if used_nums else 1
-            self.demo_num = next_demo_num
-            ros.loginfo(f"started recording demo: {self.demo_num}")
-            with self.bag_lock:
-                self.bag = rosbag.Bag(os.path.join(self.bag_path, f"demo_{self.demo_num}.bag"), "w", compression="lz4")
-            self.is_recording = True
+            self._start_recording(self.task)
         elif msg.buttons[9] > 0 and self.is_recording:
             # 4 button on space mouse
-            self.is_recording = False
-            with self.bag_lock:
-                self.bag.close()
-            ros.loginfo(f"saved demo: {self.demo_num}")
-            self.demo_num += 1
+            self._stop_recording()
+    
+    def record_cmd_callback(self, msg):
+        cmd = msg.data
+        if cmd.startswith("start:"):
+            folder_name = cmd[len("start:"):]
+            self._start_recording(folder_name)
+        elif cmd == "stop":
+            self._stop_recording()
     
     def cache_aggregate(self):
         assert self.policy == "latest"
@@ -115,8 +131,6 @@ if __name__=="__main__":
     parser.add_argument("--task", default="task", type=str, help="name of the task")
     parser.add_argument("--policy", default="synced", type=str, help="time policy")
     args, _ = parser.parse_known_args()
-    bag_path = os.path.join(args.bag_root, args.task)
-    Path(bag_path).mkdir(parents=True, exist_ok=True)
-    RecordBagNode(bag_path, policy=args.policy)
+    RecordBagNode(args.bag_root, args.task, policy=args.policy)
     ros.spin()
     

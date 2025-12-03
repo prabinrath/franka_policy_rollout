@@ -1,5 +1,6 @@
 <launch>
     <arg name="task" default="task" doc="Name of the task"/>
+    <arg name="interactive" default="false" doc="Enable interactive WebSocket server"/>
     <include file="$(find codig_robot)/launch/camera_setup.launch">
         <arg name="camera_name" value="front"/>
     </include>
@@ -8,4 +9,6 @@
     </include>
     <node name="record_bag_node" pkg="codig_robot" type="record_bag_node.py" output="screen" 
         args="--bag_root $(find codig_robot)/bags --task $(arg task)" />
+    <node name="interaction_server" pkg="codig_robot" type="interaction_server.py" output="screen"
+        if="$(arg interactive)" />
 </launch>
